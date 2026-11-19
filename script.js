@@ -89,7 +89,24 @@ animatedItems.forEach(item => observer.observe(item));
 
 // ======= Form Logic =======
 const form = document.getElementById('portfolio-form');
-form.addEventListener('submit', (e) => {
+const statusEl = document.getElementById('form-status');
+form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    alert('Thank you, Sandeep! Message sent.');
+    statusEl.textContent = 'Sending...';
+    try {
+        const res = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) throw new Error('failed');
+        statusEl.textContent = 'Thank you! Your message has been sent.';
+        form.reset();
+    } catch (err) {
+        // Fallback: open the visitor's email app
+        const n = encodeURIComponent(form.name.value);
+        const m = encodeURIComponent(form.message.value + '\n\nFrom: ' + form.email.value);
+        window.location.href = `mailto:sandeepsirisala04@gmail.com?subject=Portfolio message from ${n}&body=${m}`;
+        statusEl.textContent = 'Opening your email app instead...';
+    }
 });
